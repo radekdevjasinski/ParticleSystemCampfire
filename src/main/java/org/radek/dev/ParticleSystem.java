@@ -76,12 +76,12 @@ public class ParticleSystem {
         }
         particles.removeIf(p -> p.age >= p.lifetime);
     }
-    float randomFloat(float min, float max)
+    public static float randomFloat(float min, float max)
     {
         Random r = new Random();
         return min + r.nextFloat() * (max - min);
     }
-    Vector3f addVector(Vector3f a, Vector3f b)
+    public static Vector3f addVector(Vector3f a, Vector3f b)
     {
         return new Vector3f(a.x + b.x, a.y + b.y,a.z + b.z);
     }

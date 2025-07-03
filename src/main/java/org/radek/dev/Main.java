@@ -19,6 +19,8 @@ public class Main {
     private List<ParticleSystem> particleSystems = new ArrayList<>();
     private Shader shader;
     private Render render;
+    private PointLight fireLight;
+    private List<Vector3f> trees = new ArrayList<>();
 
     public static int WIDTH = 800, HEIGHT = 600;
 
@@ -76,8 +78,14 @@ public class Main {
         render.createWoodBuffer();
         render.createTrunkBuffer();
         render.createCrownBuffer();
+        render.createStarBuffer(100);
 
         shader = new Shader();
+
+        GenerateTrees(100);
+
+        // ognisko
+        fireLight = new PointLight(new Vector3f(0f,1f,0f),new Vector3f(1.0f, 0.5f, 0.2f), 1.4f,100f);
     }
 
     private void loop() {
@@ -97,8 +105,10 @@ public class Main {
 
         float[] model = Transform.identityMatrix();
         float lastTime = 0;
+
+        int frameCounter = 0;
         while (!glfwWindowShouldClose(window)) {
-            glClearColor(0.137f, 0.216f, 0.294f, 1.0f);
+            glClearColor(0f, 0f, 0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             float currentTime = (float)glfwGetTime();
@@ -118,24 +128,77 @@ public class Main {
 
 
             shader.useShader(shader.defaultShader, projection, view, model);
-            shader.setUniformColor(shader.defaultShader, new Vector4f(0.07f, 0.09f, 0.05f, 1.0f));
+
+            //światło
+            frameCounter++;
+            if (frameCounter >= 7) { // zmieniaj co 5 klatek
+                frameCounter = 0;
+                fireLight.intensity = ParticleSystem.randomFloat(0.7f, 1.5f);
+            }
+            shader.setUniformLight(shader.defaultShader, fireLight);
+
+
+            shader.setUniformColor(shader.defaultShader, new Vector3f(0f, 0.36f, 0f));
             render.drawGround();
 
-            shader.setUniformColor(shader.defaultShader, new Vector4f(0.4f, 0.2f, 0.1f, 1.0f));
-            render.drawWood();
-/*
-            shader.setUniformColor(shader.defaultShader, new Vector4f(0.4f, 0.2f, 0.1f, 1));
-            shader.setUniformPosition(shader.defaultShader, new Vector3f(-15,0,50f));
-            render.drawTrunk();
 
-            shader.setUniformColor(shader.defaultShader, new Vector4f(0f, 1f, 0f, 1f));
-            shader.setUniformPosition(shader.defaultShader, new Vector3f(-15,0,50f));
-            render.drawCrown();*/
+            shader.setUniformColor(shader.defaultShader, new Vector3f(0.4f, 0.2f, 0.1f));
+            render.drawWood();
+
+
+            DrawTrees();
+            shader.useShader(shader.starShader, projection, view, model);
+            shader.setUniformColor(shader.starShader, new Vector3f(1f, 1f, 1f));
+            render.drawStars(100);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
     }
+    void GenerateTrees(int count) {
+        float minDistance = 10f; // Minimalna odległość między drzewami
+
+        int attempts = 0;
+        int maxAttempts = count * 100; // Limit prób, żeby uniknąć nieskończonej pętli
+
+        while (trees.size() < count && attempts < maxAttempts) {
+            float randomX = ParticleSystem.randomFloat(-100f, 100f);
+            float randomZ = ParticleSystem.randomFloat(20f, 200f);
+            Vector3f newTree = new Vector3f(randomX, 0, randomZ);
+
+            boolean tooClose = false;
+
+            for (Vector3f tree : trees) {
+                if (tree.distance(newTree) < minDistance) {
+                    tooClose = true;
+                    break;
+                }
+            }
+
+            if (!tooClose) {
+                trees.add(newTree);
+            }
+
+            attempts++;
+        }
+
+        if (trees.size() < count) {
+            System.out.println("Nie udało się wygenerować wszystkich drzew – zbyt mało miejsca.");
+        }
+    }
+
+    void DrawTrees()
+    {
+        for (Vector3f tree : trees) {
+            shader.setUniformColor(shader.defaultShader, new Vector3f(0.4f, 0.2f, 0.1f));
+            shader.setUniformPosition(shader.defaultShader, new Vector3f(tree.x, 0, tree.z));
+            render.drawTrunk();
+            shader.setUniformColor(shader.defaultShader, new Vector3f(0f, 1f, 0f));
+            shader.setUniformPosition(shader.defaultShader, new Vector3f(tree.x, 0, tree.z));
+            render.drawCrown();
+        }
+    }
+
 
     public static void main(String[] args) {
         new Main().run();

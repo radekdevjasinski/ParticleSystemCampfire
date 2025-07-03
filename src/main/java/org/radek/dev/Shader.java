@@ -2,7 +2,6 @@ package org.radek.dev;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.FloatBuffer;
@@ -13,10 +12,12 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 public class Shader {
     public int particleShader;
     public int defaultShader;
+    public int starShader;
     public Shader()
     {
         particleShader = createShaderProgram("resources/shaders/particle");
         defaultShader = createShaderProgram("resources/shaders/default");
+        starShader = createShaderProgram("resources/shaders/star");
     }
     private static String loadShader(String path) {
         try {
@@ -93,14 +94,33 @@ public class Shader {
     {
         glDeleteProgram(particleShader);
         glDeleteProgram(defaultShader);
+        glDeleteProgram(starShader);
     }
-    public void setUniformColor(int shaderProgram, Vector4f color) {
+    public void setUniformColor(int shaderProgram, Vector3f color) {
         int loc = glGetUniformLocation(shaderProgram, "uColor");
-        glUniform4f(loc, color.x, color.y, color.z, color.w);
+        glUniform3f(loc, color.x, color.y, color.z);
     }
     public void setUniformPosition(int shaderProgram, Vector3f position)
     {
         Matrix4f model = new Matrix4f().identity().translate(position);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), false, model.get(new float[16]));
+    }
+    public void setUniformLight(int shaderProgram, PointLight pointLight)
+    {
+        int lightPosLoc = glGetUniformLocation(shaderProgram, "lightPosition");
+        int lightColorLoc = glGetUniformLocation(shaderProgram, "lightColor");
+        int intensityLoc = glGetUniformLocation(shaderProgram, "lightIntensity");
+        int radiusLoc = glGetUniformLocation(shaderProgram, "lightRadius");
+
+        // Pozycja ognia
+        glUniform3f(lightPosLoc, pointLight.position.x, pointLight.position.y, pointLight.position.z);
+
+        // Kolor ognia (pomarańczowy)
+        glUniform3f(lightColorLoc, pointLight.color.x, pointLight.color.y, pointLight.color.z);
+
+        // Intensywność i promień światła
+        glUniform1f(intensityLoc, pointLight.intensity);
+        glUniform1f(radiusLoc, pointLight.radius);
+
     }
 }
