@@ -99,11 +99,13 @@ public class Render {
 
         // Pozycja (location = 0)
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT,
+                false, stride, 0);
 
         // Normalna (location = 1)
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, false, stride, 3 * Float.BYTES);
+        glVertexAttribPointer(1, 3, GL_FLOAT,
+                false, stride, 3 * Float.BYTES);
 
         glBindVertexArray(0);
     }
@@ -289,7 +291,7 @@ public class Render {
 
     public void drawGround() {
         glBindVertexArray(groundBuffers[0]);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);  // rysujesz 4 wierzchołki
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);  // rysuje 4 wierzchołki
         glBindVertexArray(0);
     }
 

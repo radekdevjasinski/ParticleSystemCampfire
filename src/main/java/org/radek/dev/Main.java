@@ -21,8 +21,11 @@ public class Main {
     private Render render;
     private PointLight fireLight;
     private List<Vector3f> trees = new ArrayList<>();
+    private FPS fps;
 
     public static int WIDTH = 800, HEIGHT = 600;
+
+
 
     public void run() {
         init();
@@ -86,6 +89,8 @@ public class Main {
 
         // ognisko
         fireLight = new PointLight(new Vector3f(0f,1f,0f),new Vector3f(1.0f, 0.5f, 0.2f), 1.4f,100f);
+
+        fps = new FPS();
     }
 
     private void loop() {
@@ -115,14 +120,21 @@ public class Main {
             float deltaTime = currentTime - lastTime;
             lastTime = currentTime;
 
+            // dla każdego systemu cząstek (są dwa - ogień i dym)
             for(ParticleSystem ps : particleSystems)
             {
+                // dodaj nowe cząstki
                 ps.emitParticles(deltaTime);
+                // aktualizuj cząstki
                 ps.updateParticles(deltaTime);
 
+                // użyj shadera cząstek
                 shader.useShader(shader.particleShader, projection, view, model);
 
+                // zaktualizuj buffery (pozycja, wielkość i kolor się zmieniają)
                 render.updateParticlesBuffer(ps.particles);
+
+                //narysuj cząstki
                 render.drawParticles(ps.particles);
             }
 
@@ -150,6 +162,8 @@ public class Main {
             shader.useShader(shader.starShader, projection, view, model);
             shader.setUniformColor(shader.starShader, new Vector3f(1f, 1f, 1f));
             render.drawStars(100);
+
+            fps.calculateFPS();
 
             glfwSwapBuffers(window);
             glfwPollEvents();

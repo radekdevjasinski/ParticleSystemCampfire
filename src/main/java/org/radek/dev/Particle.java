@@ -14,7 +14,8 @@ public class Particle {
     public Vector4f endColor;
 
 
-    public Particle(Vector3f position, Vector3f velocity, float lifetime, float startSize, Vector4f startColor, Vector4f endColor) {
+    public Particle(Vector3f position, Vector3f velocity, float lifetime,
+                    float startSize, Vector4f startColor, Vector4f endColor) {
         this.position = position;
         this.velocity = velocity;
         this.lifetime = lifetime;
